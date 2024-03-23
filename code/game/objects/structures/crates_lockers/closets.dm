@@ -334,6 +334,7 @@
 // this should probably use dump_contents()
 /obj/structure/closet/ex_act(severity)
 	var/obj/item/weapon/circuitboard/airlock/E
+	jiggle_all(W_CLASS_LARGE)
 	switch(severity)
 		if(1)
 			broken = 1
@@ -368,7 +369,12 @@
 				dump_contents()
 				qdel(src)
 
+/obj/structure/closet/kick_act(mob/living/H)
+	jiggle_all()
+	..()
+
 /obj/structure/closet/shuttle_act()
+	jiggle_all()
 	for(var/atom/movable/AM in contents)
 		AM.forceMove(src.loc)
 		AM.shuttle_act()
@@ -378,6 +384,7 @@
 /obj/structure/closet/bullet_act(var/obj/item/projectile/Proj)
 	health -= Proj.damage
 	. = ..()
+	jiggle_all()
 	if(health <= 0)
 		broken = 1
 		if(has_electronics)
@@ -430,6 +437,7 @@
 	if(user.environment_smash_flags & SMASH_CONTAINERS)
 //		user.do_attack_animation(src, user) //This will look stupid
 		visible_message("<span class='warning'>[user] destroys the [src]. </span>")
+		jiggle_all()
 		broken = 1
 		if(has_electronics)
 			dump_electronics()
@@ -439,6 +447,7 @@
 // this should probably use dump_contents()
 /obj/structure/closet/blob_act()
 	anim(target = loc, a_icon = 'icons/mob/blob/blob.dmi', flick_anim = "blob_act", sleeptime = 15, lay = 12)
+	jiggle_all()
 	if(prob(75))
 		broken = 1
 		if(has_electronics)
@@ -639,6 +648,7 @@
 	. = do_after_default_checks(arglist(args))
 	if(.)
 		shake_closet()
+		jiggle_all()
 
 
 /obj/structure/closet/proc/shake_closet()
@@ -671,8 +681,16 @@
 		to_chat(ghost, "It contains: <span class='info'>[counted_english_list(contents)]</span>.")
 		investigation_log(I_GHOST, "|| had its contents checked by [key_name(ghost)][ghost.locked_to ? ", who was haunting [ghost.locked_to]" : ""]")
 
+/obj/structure/closet/proc/jiggle(var/obj/item/I)
+	var/jx = I.w_class == W_CLASS_TINY ? 7 : 3
+	var/jy = I.w_class == W_CLASS_TINY ? 3 : 1
+	I.pixel_x = rand(-jx,jx)
+	I.pixel_y = rand(-jy,jy)
 
-
+/obj/structure/closet/proc/jiggle_all(var/item_size = W_CLASS_SMALL)
+	for(var/obj/item/I in contents)
+		if(I.w_class <= item_size)
+			jiggle(I)
 
 // -- Vox raiders.
 

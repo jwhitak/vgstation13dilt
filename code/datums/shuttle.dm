@@ -494,6 +494,8 @@
 						M.Knockdown(3)
 			else
 				shake_camera(M, 3, 1) // buckled, not a lot of shaking
+	for(var/obj/structure/closet/C in linked_area)
+		C.jiggle_all()
 
 //Gibs or moves mobs and stuff
 /datum/shuttle/proc/collide(var/atom/movable/AM as mob|obj)
