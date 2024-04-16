@@ -989,6 +989,20 @@ var/global/list/charcoal_doesnt_remove=list(
 
 	M.overeatduration = 0
 
+/datum/reagent/mahkoexpitol
+	name = "Mahkoexpitol"
+	id = MAHKOEXPITOL
+	description = "An unusual chemical that annihilates other chemicals on contact."
+	reagent_state = REAGENT_STATE_SOLID
+	color = "#808080" //rgb: 128, 128, 128
+	specheatcap = 1.23
+	density = 0.968
+
+/datum/reagent/mahkoexpitol/on_introduced(var/data)
+	..()
+	playsound(holder, "sound/effects/bubbles.ogg", 75, 1)
+	holder.clear_reagents()
+
 //Great healing powers. Metabolizes extremely slowly, but gets used up when it heals damage.
 //Dangerous in amounts over 5 units, healing that occurs while over 5 units adds to a counter. That counter affects gib chance. Guaranteed gib over 20 units.
 /datum/reagent/mednanobots
@@ -1101,6 +1115,36 @@ var/global/list/charcoal_doesnt_remove=list(
 /datum/reagent/methylin/on_overdose(var/mob/living/M)
 	M.adjustToxLoss(1)
 	M.adjustBrainLoss(1)
+
+/datum/reagent/morathial
+	name = "Morathial"
+	id = MORATHIAL
+	description = "A very powerful healing chemical, made to be used in small doses."
+	reagent_state = REAGENT_STATE_SOLID
+	color = "#285a35"
+	overdose_tick = 51 //triggers immediately after 10u have been processed
+	specheatcap = 1.23
+	density = 0.968
+
+/datum/reagent/morathial/on_mob_life(var/mob/living/M)
+	if(..())
+		return 1
+
+	if(ishuman(M))
+		var/mob/living/carbon/human/H = M
+		for(var/datum/organ/external/E in H.organs)
+			for(var/datum/wound/W in E.wounds)
+				if(istype(W,/datum/wound/internal_bleeding))
+					W.heal_damage(0.3, TRUE)
+				else
+					W.heal_damage(0.2, TRUE)
+
+/datum/reagent/morathial/on_overdose(var/mob/living/M)
+	M.adjustToxLoss(2)
+	M.adjustCloneLoss(2)
+	var/mob/living/carbon/human/H = M
+	if(istype(H) && prob(20))
+		H.custom_pain("Your entire body feels like it's melting!", 1, scream = TRUE)
 
 /datum/reagent/nanobots
 	name = "Nanobots"

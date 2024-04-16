@@ -1978,3 +1978,18 @@
 		return 1
 	H.radiation = max(H.radiation - 5 * REM, 0)
 	H.rad_tick = max(H.rad_tick - 3 * REM, 0)
+
+/datum/reagent/ethanol/drink/chumpari
+	name = "Chumpari"
+	id = CHUMPARI
+	description = "Drinking this nasty mix will probably make you vomit."
+	color = "#DD0000" //rgb: 54, 20, 18
+	glass_icon_state = "dragonsspit"
+	glass_desc = "A glass of the worst thing to come out of Italy."
+
+/datum/reagent/ethanol/drink/chumpari/on_mob_life(var/mob/living/M)
+	if(..())
+		return 1
+	if(ishuman(M) && prob(5))
+		var/mob/living/carbon/human/H = M
+		H.vomit()
