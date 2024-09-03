@@ -210,3 +210,111 @@
 		return HSVtoRGB(hsv(hsv_list[1], hsv_list[2], hsv_list[3], hsv_list[4]))
 	return HSVtoRGB(hsv(hsv_list[1], hsv_list[2], hsv_list[3]))
 
+/*
+ * Generates a color matrix to modify an image's brightness, contrast, and/or saturation.
+ * Use by placing this in the image or icon's .color variable.
+ *
+ * brighntess - Brightness change from -1 to 1. default 0 for no change
+ * contrast - Contrast change from 0 to infinite. default 1 for no change
+ * saturation - Saturation change from 0 to infinite. default 1 for no change
+ */
+/proc/generate_color_matrix_bcs(var/brightness = 0, var/contrast = 1, var/saturation = 1)
+	//beware of math
+	//you were warned
+	//now embrace suffering as we venture into matrix multiplication
+	var/satred = (1 - saturation) * 0.3086 //magic luminance constants
+	var/satgreen = (1 - saturation) * 0.6094
+	var/satblue = (1 - saturation) * 0.0820
+
+	var/conshift = (1 - contrast) / 2
+	var/conchange = conshift + brightness
+
+	var/list/redrow = list(contrast * (satred + saturation), contrast * (satred), contrast * (satred), 0, 0)
+	var/list/greenrow = list(contrast * (satgreen), contrast * (satgreen + saturation), contrast * (satgreen), 0, 0)
+	var/list/bluerow = list(contrast * (satblue), contrast * (satblue), contrast * (satblue + saturation), 0, 0)
+	var/list/alpharow = list(0, 0, 0, 1, 0)
+	var/list/constantrow = list(conchange, conchange, conchange, 0, 1)
+
+	var/list/transformation_matrix = list(redrow, greenrow, bluerow, alpharow, constantrow)
+
+	return transformation_matrix
+
+/obj/proc/changebcs(var/b = 0, var/c = 1, var/s = 1)
+	color = generate_color_matrix_bcs(b, c, s)
+
+/mob/proc/changebcs(var/b = 0, var/c = 1, var/s = 1)
+	color = generate_color_matrix_bcs(b, c, s)
+
+/atom/proc/dorf_color(var/setcolor)
+	dorf_color_adv(setcolor)
+
+/atom/proc/dorf_gold_test(var/brightnessmod = 0.50, var/contrastmod = 1.90)
+	dorf_color_adv("#F7C430", brightnessmod, contrastmod)
+
+/atom/proc/dorf_color_adv(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
+	if(!setcolor)
+		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
+	var/basegrayscale = generate_color_matrix_bcs(brightnessmod,contrastmod,0) //fully desaturated... in theory
+	//filters += filter(type="color", color = basegrayscale)
+	//filters += filter(type="color", color = setcolor)
+	//color = setcolor
+
+	var/image/baseoverlay = image(icon, src, icon_state)
+	baseoverlay.filters += filter(type="color", color = basegrayscale)
+	baseoverlay.color = setcolor
+
+	//var/image/iconcolor = image('icons/effects/32x32.dmi', src, "white")
+	//iconcolor.color = setcolor
+	//iconcolor.appearance_flags = KEEP_COLOR
+	//iconcolor.blend_mode = BLEND_INSET_OVERLAY
+	//baseoverlay.overlays += iconcolor
+
+	var/image/glint = image(icon, src, icon_state)
+	glint.appearance_flags = RESET_COLOR
+	var/glintgrayscale = generate_color_matrix_bcs(-0.50,1.95,0)
+	glint.color = glintgrayscale
+	//glint.filters += filter(type="color", color = glintgrayscale)
+	glint.blend_mode = BLEND_ADD
+	baseoverlay.overlays += glint
+	for(var/atom/subject in overlays)
+		subject.dorf_color(setcolor)
+
+	overlays += baseoverlay
+
+/atom/proc/ordinary_color(var/setcolor)
+	filters = null
+	overlays = null
+	if(!setcolor)
+		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
+	color = setcolor
+
+/atom/proc/colormatrixadd_color(var/setcolor)
+	if(!setcolor)
+		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
+	color = COLOR_MATRIX_ADD(setcolor)
+
+/atom/proc/findaveragecolorblock()
+	if(z != map.zMainStation)
+		return null
+	return AverageColor(icon(icon, icon_state), 1)
+	//to_chat(world, "We found average [setcolor] in [src].")
+	//var/image/iconcolor = image('icons/effects/32x32.dmi', src, "white")
+	//iconcolor.color = setcolor
+	//overlays += iconcolor
+
+/atom/proc/findcolormode()
+	var/list/colors = ListColors(icon(icon, icon_state), 1)
+	if(!colors.len)
+		return null
+	var/list/results = list()
+	for(var/x in colors)
+		if(!results[x])
+			results[x] = 1
+		else
+			results[x] += 1
+	return associative_max_key(results)
+
+	// //to_chat(world, "We found mode [setcolor] in [src] with [results[setcolor]] results.")
+	//var/image/iconcolor = image('icons/effects/32x32.dmi', src, "white")
+	//iconcolor.color = setcolor
+	//overlays += iconcolor

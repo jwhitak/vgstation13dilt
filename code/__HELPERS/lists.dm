@@ -528,6 +528,16 @@
         if(max == null || L[a] > max) max = L[a]
     return max
 
+//returns the key with the maximum value in an associative list, assuming the values are numbers.
+/proc/associative_max_key(list/L)
+    var/max
+    var/result
+    for(var/a in L)
+        if(max == null || L[a] > max)
+            max = L[a]
+            result = a
+    return result
+
 //Convert a list of paths into a list of object names
 /proc/types_to_english_list(var/list/L)
 	var/list/names = list()
