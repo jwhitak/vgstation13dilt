@@ -239,70 +239,69 @@
 
 	return transformation_matrix
 
-/obj/proc/changebcs(var/b = 0, var/c = 1, var/s = 1)
-	color = generate_color_matrix_bcs(b, c, s)
+/*
+ * Modifies an atom's brightness, contrast, and/or saturation.
+ * This adds a color filter over the atom by default, so .color use may be affected.
+ *
+ * brighntess - Brightness change from -1 to 1. default 0 for no change
+ * contrast - Contrast change from 0 to infinite. default 1 for no change
+ * saturation - Saturation change from 0 to infinite. default 1 for no change
+ * filter - Adds the greyscale layer as a color filter. default TRUE
+ */
+/atom/proc/change_bcs(var/b = 0, var/c = 1, var/s = 1, var/filter = TRUE)
+	if(filter)
+		filters += filter(type="color", color = generate_color_matrix_bcs(b, c, s))
+	else
+		color = generate_color_matrix_bcs(b, c, s)
 
-/mob/proc/changebcs(var/b = 0, var/c = 1, var/s = 1)
-	color = generate_color_matrix_bcs(b, c, s)
-
-/atom/proc/dorf_color(var/setcolor)
-	dorf_color_adv(setcolor)
-
-/atom/proc/dorf_gold_test(var/brightnessmod = 0.50, var/contrastmod = 1.90)
-	dorf_color_adv("#F7C430", brightnessmod, contrastmod)
-
-/atom/proc/dorf_color_adv(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
+/*
+ * Vibrantly recolors an atom, though with some drawbacks.
+ * Doesn't function well on human mobs at present.
+ *
+ * setcolor - RGB color to set the atom to. default is a random color.
+ * brightnessmod - Base brightness to use for the initial greyscale. Default is 0.50, scales from -1 to 1.
+ * contrastmod - Base contrast to use for the initial greyscale. Default is 1.90, scales from 0 to inf.
+ */
+/atom/proc/dorf_color(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
 	if(!setcolor)
 		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
-	var/basegrayscale = generate_color_matrix_bcs(brightnessmod,contrastmod,0) //fully desaturated... in theory
-	//filters += filter(type="color", color = basegrayscale)
-	//filters += filter(type="color", color = setcolor)
-	//color = setcolor
-
+	//Base greyscale layer.
+	var/basegrayscale = generate_color_matrix_bcs(brightnessmod,contrastmod,0)
 	var/image/baseoverlay = image(icon, src, icon_state)
 	baseoverlay.filters += filter(type="color", color = basegrayscale)
+	//Color layer, this applies the desired color.
+	//Despite the above filter clearly layering over the atom, the color variable is applied after the filter (thanks DM!)
 	baseoverlay.color = setcolor
-
-	//var/image/iconcolor = image('icons/effects/32x32.dmi', src, "white")
-	//iconcolor.color = setcolor
-	//iconcolor.appearance_flags = KEEP_COLOR
-	//iconcolor.blend_mode = BLEND_INSET_OVERLAY
-	//baseoverlay.overlays += iconcolor
-
+	//Finally, add a 'glint' layer to brighten the image and maintain white/bright spots.
 	var/image/glint = image(icon, src, icon_state)
 	glint.appearance_flags = RESET_COLOR
 	var/glintgrayscale = generate_color_matrix_bcs(-0.50,1.95,0)
 	glint.color = glintgrayscale
-	//glint.filters += filter(type="color", color = glintgrayscale)
 	glint.blend_mode = BLEND_ADD
 	baseoverlay.overlays += glint
+	//Recursively recolor other overlays on the atom before applying this new colorized overlay.
 	for(var/atom/subject in overlays)
 		subject.dorf_color(setcolor)
 
 	overlays += baseoverlay
 
-/atom/proc/ordinary_color(var/setcolor)
-	filters = null
-	overlays = null
-	if(!setcolor)
-		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
-	color = setcolor
+/*
+ * A simple proc that uses dorf_color to turn things gold.
+ * This is literally just calling dorf_color but with the gold mineral color auto-selected.
+ */
+/atom/proc/dorf_gold_test(var/brightnessmod = 0.50, var/contrastmod = 1.90)
+	dorf_color("#F7C430", brightnessmod, contrastmod)
 
-/atom/proc/colormatrixadd_color(var/setcolor)
-	if(!setcolor)
-		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
-	color = COLOR_MATRIX_ADD(setcolor)
-
-/atom/proc/findaveragecolorblock()
-	if(z != map.zMainStation)
-		return null
+/*
+ * Returns an atom's average RGB value, ignoring greyscale
+ */
+/atom/proc/find_average_color_block()
 	return AverageColor(icon(icon, icon_state), 1)
-	//to_chat(world, "We found average [setcolor] in [src].")
-	//var/image/iconcolor = image('icons/effects/32x32.dmi', src, "white")
-	//iconcolor.color = setcolor
-	//overlays += iconcolor
 
-/atom/proc/findcolormode()
+/*
+ * Returns an atom's mode RGB, ignoring greyscale
+ */
+/atom/proc/find_color_mode()
 	var/list/colors = ListColors(icon(icon, icon_state), 1)
 	if(!colors.len)
 		return null
@@ -313,8 +312,3 @@
 		else
 			results[x] += 1
 	return associative_max_key(results)
-
-	// //to_chat(world, "We found mode [setcolor] in [src] with [results[setcolor]] results.")
-	//var/image/iconcolor = image('icons/effects/32x32.dmi', src, "white")
-	//iconcolor.color = setcolor
-	//overlays += iconcolor
