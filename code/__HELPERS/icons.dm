@@ -263,27 +263,56 @@
  * contrastmod - Base contrast to use for the initial greyscale. Default is 1.90, scales from 0 to inf.
  */
 /atom/proc/dorf_color(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
+	dorf_colorize(src, setcolor, brightnessmod, contrastmod)
+
+/proc/dorf_colorize(var/atom/A, var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
+	if(!A)
+		return
 	if(!setcolor)
 		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
 	//Base greyscale layer.
 	var/basegrayscale = generate_color_matrix_bcs(brightnessmod,contrastmod,0)
-	var/image/baseoverlay = image(icon, src, icon_state)
+	var/image/baseoverlay = image(A.icon, A, A.icon_state)
 	baseoverlay.filters += filter(type="color", color = basegrayscale)
 	//Color layer, this applies the desired color.
 	//Despite the above filter clearly layering over the atom, the color variable is applied after the filter (thanks DM!)
 	baseoverlay.color = setcolor
 	//Finally, add a 'glint' layer to brighten the image and maintain white/bright spots.
-	var/image/glint = image(icon, src, icon_state)
+	var/image/glint = image(A.icon, A, A.icon_state)
 	glint.appearance_flags = RESET_COLOR
 	var/glintgrayscale = generate_color_matrix_bcs(-0.50,1.95,0)
 	glint.color = glintgrayscale
 	glint.blend_mode = BLEND_ADD
 	baseoverlay.overlays += glint
 	//Recursively recolor other overlays on the atom before applying this new colorized overlay.
-	for(var/atom/subject in overlays)
-		subject.dorf_color(setcolor)
+	var/list/overlaystorage = list()
+	for(var/subject in A.overlays)
+		dorf_colorize(subject, setcolor)
+		overlaystorage += subject
+		A.overlays -= subject
 
-	overlays += baseoverlay
+	A.overlays += baseoverlay
+
+	for(var/i = overlaystorage.len, i > 0, i--)
+		A.overlays += overlaystorage[i]
+
+	return A
+
+/obj/item/dorf_color(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
+	if(!setcolor)
+		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
+	..(setcolor = setcolor)
+	var/image/lefthandoverlay = image(inhand_states["left_hand"], src, item_state ? item_state : icon_state)
+	var/image/righthandoverlay = image(inhand_states["right_hand"], src, item_state ? item_state : icon_state)
+	dynamic_overlay["[HAND_LAYER]-[GRASP_LEFT_HAND]"] = dorf_colorize(lefthandoverlay, setcolor, brightnessmod, contrastmod)
+	dynamic_overlay["[HAND_LAYER]-[GRASP_RIGHT_HAND]"] = dorf_colorize(righthandoverlay, setcolor, brightnessmod, contrastmod)
+
+/obj/item/clothing/dorf_color(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
+	if(!setcolor)
+		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
+	..(setcolor = setcolor)
+	//todo: ARMOR COLORS!!
+
 
 /*
  * A simple proc that uses dorf_color to turn things gold.
