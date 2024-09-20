@@ -167,7 +167,6 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 	var/cointype=null
 	var/value=0
 	var/color
-	var/color_matrix
 	var/alpha = 255
 	//Modifier multipliers.
 	var/brunt_damage_mod = 1
@@ -327,7 +326,7 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 	sharpness_mod = rand(1,2)/rand(1,8)
 	quality_mod = rand(1,2)/rand(1,8)
 
-	color_matrix = list(rand(),rand(),rand(),0,
+	color 			= list(rand(),rand(),rand(),0,
 						rand(),rand(),rand(),0,
 						rand(),rand(),rand(),0,
 						0,0,0,1,

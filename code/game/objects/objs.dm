@@ -585,6 +585,13 @@ a {
 	onclose(user, "mtcomputer")
 
 /obj/update_icon()
+	if(dorfized)
+		dorfized.generate_sprite(src)
+		icon = 'icons/effects/32x32.dmi'
+		icon_state = "blank"
+	else
+		icon = initial(icon)
+		icon_state = initial(icon_state)
 	if(ash_covered)
 		cut_overlay(charred_overlay)
 		process_charred_overlay()
@@ -828,8 +835,8 @@ a {
 	*/
 	var/initial_quality = round(((rand(1,3)*surrounding_mod)*material_mod)+modifier)
 	quality = clamp(initial_quality, B_AWFUL>min_quality?B_AWFUL:min_quality, B_LEGENDARY)
-	var/processed_name = lowertext(mat? mat.processed_name : material_type.processed_name)
-	var/to_icon_state = "[initial(icon_state)]_[processed_name]_[quality]"
+	//var/processed_name = lowertext(mat? mat.processed_name : material_type.processed_name)
+	var/to_icon_state = "[initial(icon_state)]-[quality]"
 	if(has_icon(icon, to_icon_state))
 		icon_state = to_icon_state
 
@@ -858,7 +865,7 @@ a {
 	if(additional_description)
 		desc = "[initial(desc)] \n [additional_description]"
 
-/obj/proc/dorfify(var/datum/material/mat, var/additional_quality, var/min_quality = 0)
+/obj/proc/dorfify(var/datum/material/mat, var/additional_quality, var/min_quality = 0, var/force_dorfize = FALSE)
 	if(mat)
 		/*var/icon/original = icon(icon, icon_state) Icon operations keep making mustard gas
 		if(mat.color)
@@ -889,6 +896,27 @@ a {
 			throwforce = initial(throwforce)*(material_type.brunt_damage_mod*(quality/B_AVERAGE))
 	if(!findtext(lowertext(name), lowertext(material_type.name)))
 		name = "[quality == B_AVERAGE ? "": "[lowertext(qualityByString[quality])] "][lowertext(mat.name)] [name]"
+	if(material_type)
+		if(dorfized)
+			qdel(dorfized)
+		if(force_dorfize)
+			dorfized = force_dorfize
+		else
+			dorfized = new(dorf_colorize(src, material_type.color))
+	return src
+
+/obj/item/dorfify(var/datum/material/mat, var/additional_quality, var/min_quality = 0, var/force_dorfize = FALSE)
+	. = ..()
+	if(dorfized && !force_dorfize)
+		dorfized.dyn_overlay_left = dorf_colorize(image(inhand_states["left_hand"], src, item_state ? item_state : icon_state), material_type.color)
+		dorfized.dyn_overlay_right = dorf_colorize(image(inhand_states["right_hand"], src, item_state ? item_state : icon_state), material_type.color)
+
+/obj/item/clothing/dorfify(var/datum/material/mat, var/additional_quality, var/min_quality = 0, var/force_dorfize = FALSE)
+	. = ..()
+	if(dorfized && !force_dorfize && cloth_layer)
+		dorfized.cloth_layer = cloth_layer
+		dorfized.dyn_overlay_worn = dorf_colorize(image(cloth_icon, src, icon_state), material_type.color)
+
 
 /obj/proc/check_uplink_validity()
 	return TRUE

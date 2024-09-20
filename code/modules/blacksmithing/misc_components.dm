@@ -1,6 +1,7 @@
 /obj/item/item_head
 	icon = 'icons/obj/misc_components.dmi'
 	w_type = RECYK_METAL
+	var/handle_type = /obj/item/sword_handle
 	var/obj/item/result
 	var/list/finishing_requirements = list(/obj/item/item_handle) //Things required to finish this object.
 
@@ -13,7 +14,7 @@
 			to_chat(user, "<span class = 'notice'>A [initial(I.name)]</span>")
 
 /obj/item/item_head/attackby(obj/item/I, mob/user)
-	if(is_type_in_list(I, finishing_requirements))
+	if(is_type_in_list(I, finishing_requirements.Copy()))
 		to_chat(user, "<span class = 'notice'>You begin to attach \the [I] to \the [src].</span>")
 		if(do_after(user, src, 4 SECONDS))
 			if(istype(I, /obj/item/stack))
@@ -30,8 +31,14 @@
 				else
 					materials.addFrom(I.materials)
 
-			finishing_requirements.Remove(I.type)
+			for(var/testtype in finishing_requirements)
+				if(istype(I, testtype))
+					finishing_requirements.Remove(testtype)
+					break
 			gen_quality(quality-I.quality, quality, I.material_type)
+			if(dorfized && I.dorfized)
+				dorfized.overlay_dorfs += I.dorfized
+				update_icon()
 			if(!istype(I, /obj/item/stack))
 				qdel(I) //stacks handle themselves if they run out
 
@@ -42,7 +49,9 @@
 				result.materials.addFrom(materials)
 				var/datum/material/mat = material_type
 				if(mat)
-					result.dorfify(mat, 0, quality)
+					result.dorfify(mat, 0, quality, dorfized)
+					//result.dorfized = dorfized
+					result.update_icon()
 				user.put_in_hands(result)
 				qdel(src)
 		return
@@ -53,6 +62,7 @@
 	icon_state = "hammer_head"
 	desc = "unlike the shark, this one lacks bite."
 	result = /obj/item/weapon/hammer
+	handle_type = /obj/item/item_handle
 
 /obj/item/item_head/pitchfork_head
 	name = "pitchfork head"
@@ -71,21 +81,43 @@
 	icon = 'icons/obj/misc_components.dmi'
 	icon_state = "item_handle"
 	desc = "a generic handle, with no purpose."
+	material_type = /datum/material/wood
 	starting_materials = list(MAT_WOOD = 0.5 * CC_PER_SHEET_WOOD)
 	w_type = RECYK_WOOD
 
+/obj/item/pommel
+	name = "sword pommel"
+	icon = 'icons/obj/blacksmithing/smithing.dmi'
+	icon_state = "pommel"
+	desc = "a round ball of metal."
+	starting_materials = list(MAT_IRON = 0.5 * CC_PER_SHEET_METAL)
+	w_type = RECYK_METAL
+
 /obj/item/sword_handle
 	name = "sword handle"
-	icon = 'icons/obj/misc_components.dmi'
-	icon_state = "sword_handle"
+	icon = 'icons/obj/blacksmithing/smithing.dmi'
+	icon_state = "handle"
 	desc = "A generic sword handle."
+	material_type = /datum/material/wood
 	starting_materials = list(MAT_WOOD = 0.5 * CC_PER_SHEET_WOOD, MAT_IRON = 0.5 * CC_PER_SHEET_METAL)
 	w_type = RECYK_METAL
 
-/obj/item/cross_guard
-	name = "sword crossguard"
-	icon = 'icons/obj/misc_components.dmi'
+/obj/item/guard
+	name = "sword guard"
+	icon = 'icons/obj/blacksmithing/smithing.dmi'
 	icon_state = "crossguard"
+	desc = "Used to make sure what you're stabbing doesn't slide all the way to your hand, or your hand slide to the stabby bit."
+	w_type = RECYK_METAL
+
+/obj/item/guard/cross_guard
+	name = "sword crossguard"
+	icon_state = "crossguard"
+	desc = "Used to make sure what you're stabbing doesn't slide all the way to your hand, or your hand slide to the stabby bit."
+	w_type = RECYK_METAL
+
+/obj/item/guard/bar_guard
+	name = "sword barguard"
+	icon_state = "barguard"
 	desc = "Used to make sure what you're stabbing doesn't slide all the way to your hand, or your hand slide to the stabby bit."
 	w_type = RECYK_METAL
 
@@ -93,27 +125,34 @@
 	name = "sword blade"
 	icon_state = "large_metal_blade"
 	desc = "Rather unwieldy without a hilt."
-	finishing_requirements = list(/obj/item/sword_handle, /obj/item/cross_guard)
+	handle_type = /obj/item/sword_handle
+	finishing_requirements = list(/obj/item/sword_handle, /obj/item/guard, /obj/item/pommel)
 	result = /obj/item/weapon/sword
 
 /obj/item/item_head/sword/scimitar
 	name = "scimitar blade"
-	icon_state = "large_curved_blade"
+	icon = 'icons/obj/blacksmithing/smithing.dmi'
+	icon_state = "scimitar"
 	desc = "Curved. Swords."
 	result = /obj/item/weapon/sword/scimitar
 
 /obj/item/item_head/sword/shortsword
+	icon = 'icons/obj/blacksmithing/smithing.dmi'
 	name = "shortsword blade"
+	icon_state = "shortsword"
 	result = /obj/item/weapon/sword/shortsword
 
 /obj/item/item_head/sword/gladius
+	icon = 'icons/obj/blacksmithing/smithing.dmi'
 	name = "gladius blade"
+	icon_state = "gladius"
 	result = /obj/item/weapon/sword/gladius
 	finishing_requirements = list(/obj/item/sword_handle)
 
 /obj/item/item_head/sword/sabre
+	icon = 'icons/obj/blacksmithing/smithing.dmi'
 	name = "sabre blade"
-	icon_state = "large_curved_blade"
+	icon_state = "sabre"
 	result = /obj/item/weapon/sword/sabre
 
 /obj/item/item_head/tower_shield
@@ -122,3 +161,4 @@
 	finishing_requirements = list(/obj/item/stack/leather_strip)
 	result = /obj/item/weapon/shield/riot/tower
 	w_type = RECYK_METAL
+	handle_type = null

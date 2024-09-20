@@ -74,9 +74,9 @@
 
 /obj/item/clothing/update_icon()
 	..()
-
-	overlays.len = 0
-	dynamic_overlay.len = 0
+	if(!dorfized)
+		overlays.len = 0
+		dynamic_overlay.len = 0
 	if (dyed_parts.len > 0)
 		if (!cloth_layer || !cloth_icon)
 			return
@@ -120,9 +120,14 @@
 			right_overlay.alpha = dye_alpha
 			dyn_overlay_right.overlays += right_overlay
 
-		dynamic_overlay["[cloth_layer]"] = dyn_overlay_worn
-		dynamic_overlay["[HAND_LAYER]-[GRASP_LEFT_HAND]"] = dyn_overlay_left
-		dynamic_overlay["[HAND_LAYER]-[GRASP_RIGHT_HAND]"] = dyn_overlay_right
+		if(!dorfized)
+			dynamic_overlay["[cloth_layer]"] = dyn_overlay_worn
+			dynamic_overlay["[HAND_LAYER]-[GRASP_LEFT_HAND]"] = dyn_overlay_left
+			dynamic_overlay["[HAND_LAYER]-[GRASP_RIGHT_HAND]"] = dyn_overlay_right
+		else
+			dynamic_overlay["[cloth_layer]"] += dyn_overlay_worn
+			dynamic_overlay["[HAND_LAYER]-[GRASP_LEFT_HAND]"] += dyn_overlay_left
+			dynamic_overlay["[HAND_LAYER]-[GRASP_RIGHT_HAND]"] += dyn_overlay_right
 
 
 /obj/item/clothing/can_quick_store(var/obj/item/I)

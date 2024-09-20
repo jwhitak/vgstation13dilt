@@ -139,6 +139,7 @@
 /obj/item/stack/chains
 	name = "chain"
 	desc = "link by link, my chain got longer."
+	icon = 'icons/obj/items.dmi'
 	icon_state = "chains"
 	singular_name = "chain"
 	irregular_plural = "chains"
@@ -155,8 +156,8 @@
 	..()
 
 var/list/datum/stack_recipe/chain_recipes = list (
-	new/datum/stack_recipe/blacksmithing("Suit of Chainmail",		/obj/item/clothing/suit/armor/vest/chainmail,					10,	time = 100,required_strikes = 15),
-	new/datum/stack_recipe/blacksmithing("Chainmail Coif",		/obj/item/clothing/head/helmet/chainmail,					5,	time = 100,required_strikes = 15),
+	new/datum/stack_recipe/blacksmithing("suit of chainmail",		/obj/item/clothing/suit/armor/vest/chainmail,					10,	time = 100,required_strikes = 15),
+	new/datum/stack_recipe/blacksmithing("chainmail coif",		/obj/item/clothing/head/helmet/chainmail,					5,	time = 100,required_strikes = 15),
 	)
 
 

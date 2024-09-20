@@ -263,8 +263,12 @@
  * contrastmod - Base contrast to use for the initial greyscale. Default is 1.90, scales from 0 to inf.
  */
 /atom/proc/dorf_color(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
-	dorf_colorize(src, setcolor, brightnessmod, contrastmod)
+	overlays += dorf_colorize(src, setcolor, brightnessmod, contrastmod)
 
+/**
+ * Vibrantly recolors an atom and returns an overlay to use for the recolor.
+ * Accepts any atom A
+ */
 /proc/dorf_colorize(var/atom/A, var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
 	if(!A)
 		return
@@ -273,6 +277,7 @@
 	//Base greyscale layer.
 	var/basegrayscale = generate_color_matrix_bcs(brightnessmod,contrastmod,0)
 	var/image/baseoverlay = image(A.icon, A, A.icon_state)
+	baseoverlay.appearance_flags = RESET_COLOR
 	baseoverlay.filters += filter(type="color", color = basegrayscale)
 	//Color layer, this applies the desired color.
 	//Despite the above filter clearly layering over the atom, the color variable is applied after the filter (thanks DM!)
@@ -291,13 +296,16 @@
 		overlaystorage += subject
 		A.overlays -= subject
 
-	A.overlays += baseoverlay
+	//this is handled outside
+	//A.overlays += baseoverlay
 
-	for(var/i = overlaystorage.len, i > 0, i--)
-		A.overlays += overlaystorage[i]
+	//crazy recursive thing, todo readd later
+	//for(var/i = overlaystorage.len, i > 0, i--)
+	//	A.overlays += overlaystorage[i]
 
-	return A
+	return baseoverlay
 
+/*
 /obj/item/dorf_color(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
 	if(!setcolor)
 		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
@@ -312,7 +320,7 @@
 		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
 	..(setcolor = setcolor)
 	//todo: ARMOR COLORS!!
-
+*/
 
 /*
  * A simple proc that uses dorf_color to turn things gold.

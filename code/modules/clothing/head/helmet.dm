@@ -320,6 +320,8 @@
 	icon_state = "chainmail_head"
 	item_state = "chainmail_head"
 	species_fit = list(INSECT_SHAPED)
+	body_parts_covered = HEAD|EARS|HIDEHAIR
+	body_parts_visible_override = FACE
 	armor = list(melee = 10, bullet = 15, laser = 2,energy = 2, bomb = 2, bio = 2, rad = 0)
 	flags = FPRINT
 	siemens_coefficient = 1

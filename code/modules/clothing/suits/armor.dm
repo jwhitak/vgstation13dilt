@@ -132,6 +132,8 @@
 	desc = "A series of chains linked together in a way to look like a suit."
 	icon_state = "chainmail_torso"
 	item_state = "chainmail_torso"
+	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/linencrafts.dmi', "right_hand" = 'icons/mob/in-hand/right/linencrafts.dmi')
+	species_fit = list()
 	clothing_flags = ONESIZEFITSALL
 	armor = list(melee = 20, bullet = 35, laser = 10, energy = 10, bomb = 25, bio = 0, rad = 0)
 
