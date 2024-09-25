@@ -91,8 +91,13 @@
 
 /obj/item/smithing_placeholder/attackby(obj/item/I, mob/user)
 	if(ishammer(I))
-		strike(I, user)
-		user.delayNextAttack(1 SECONDS)
+		if(istype(I,/obj/item/weapon/hammer/sledge) && I.wielded)
+			if(do_after(user, user, 25))
+				strike(I, user)
+				user.delayNextAttack(25)
+		else
+			strike(I, user)
+			user.delayNextAttack(1 SECONDS)
 	else if (I.is_hot())
 		heat(I.is_hot(), I, user)
 
@@ -134,8 +139,17 @@
 	if(!hasanvil(loc))
 		to_chat(user, "<span class = 'warning'>There is no anvil to shape \the [src] over.</span>")
 		return
-	playsound(loc, 'sound/items/hammer_strike.ogg', 50, 1)
-	spark(src, amount = 1, cardinals = FALSE, surfaceburn = TRUE, silent = TRUE)
+	var/heavy_strike = FALSE
+	if(istype(A,/obj/item/weapon/hammer/sledge))
+		var/obj/item/weapon/hammer/sledge/hammertime = A
+		heavy_strike = hammertime.wielded
+	if(heavy_strike)
+		to_chat(user, "<span class = 'warning'>You land a mighty blow on \the [src]!</span>")
+		playsound(loc, 'sound/items/hammer_strike.ogg', 75, 1)
+		spark(src, amount = 10, cardinals = FALSE, surfaceburn = TRUE, silent = TRUE)
+	else
+		playsound(loc, 'sound/items/hammer_strike.ogg', 50, 1)
+		spark(src, amount = 1, cardinals = FALSE, surfaceburn = TRUE, silent = TRUE)
 	if(strikes > strikes_required)
 		if(prob(5*(strikes/strikes_required)))
 			to_chat(user, "<span class = 'warning'>\The [src] becomes brittle and unmalleable.</span>")
@@ -147,6 +161,8 @@
 			return
 	if(istype(A,/obj/item/weapon/hammer))
 		strikes+=max(1, round(A.quality/2, 1))
+		if(heavy_strike)
+			strikes+=max(1, round(A.quality/2, 1)) //double bonus for the big strikes
 	else if(istype(A,/obj/item/weapon/storage/toolbox))
 		strikes+=0.25
 	if(!readytoquench && strikes >= strikes_required)
@@ -178,4 +194,12 @@
 	new /obj/item/weapon/storage/box/large/mystery_material(get_step(src, NORTHEAST))
 	new /obj/item/weapon/storage/box/large/mystery_material(get_step(src, NORTHEAST))
 	new /obj/item/weapon/storage/box/large/mystery_material(get_step(src, NORTHEAST))
-	new /obj/item/sword_handle(get_step(src, NORTHWEST))
+	new /obj/item/stack/sheet/wood/biggerstack(get_step(src, NORTHWEST))
+	var/obj/item/stack/clownore = new /obj/item/stack/sheet/mineral/clown(get_step(src, NORTHWEST))
+	clownore.amount = 50
+	var/obj/item/stack/leatherore = new /obj/item/stack/leather_strip(get_step(src, NORTHWEST))
+	leatherore.amount = 50
+	var/obj/item/stack/clothore = new /obj/item/stack/sheet/cloth(get_step(src, NORTHWEST))
+	clothore.amount = 50
+	new /obj/structure/reagent_dispensers/cauldron(get_step(src, SOUTHWEST))
+	new /obj/item/weapon/reagent_containers/food/condiment/ketchup(get_step(src, SOUTHWEST))

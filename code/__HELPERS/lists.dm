@@ -91,14 +91,14 @@
 	return 0
 
 //Checks for specific types in a list
-/proc/is_type_in_list(datum/A, list/L)
+/proc/is_type_in_list(datum/A, list/L, makecache = TRUE)
 	if(!L || !L.len || !A)
 		return 0
 
 	if(L[L[1]] != MAX_VALUE) //Is this already a generated typecache
-		if(isnull(L[L[1]])) //It's not a typecache, so now we'll check if its an associative list or not
+		if(makecache && isnull(L[L[1]])) //It's not a typecache, so now we'll check if its an associative list or not
 			generate_type_list_cache(L) //Convert it to an associative list format for speed in access
-		else //Else this is meant to be an associative list, we can't reformat it
+		else //Else this is meant to be an associative list or we were told to not make a typecache, we can't reformat it
 			for(var/type in L)
 				if(istype(A, type))
 					return 1

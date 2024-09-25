@@ -193,6 +193,15 @@
 
 /obj/item/tool/screwdriver/is_screwdriver(var/mob/user)
 	return TRUE
+
+/obj/item/tool/screwdriver/smithed
+	desc = "It looks hand-made."
+
+/obj/item/tool/screwdriver/smithed/New()
+	. = ..()
+	icon_state = "screwdriver"
+	item_state = "screwdriver"
+
 /*
  * Wirecutters
  */

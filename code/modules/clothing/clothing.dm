@@ -125,9 +125,26 @@
 			dynamic_overlay["[HAND_LAYER]-[GRASP_LEFT_HAND]"] = dyn_overlay_left
 			dynamic_overlay["[HAND_LAYER]-[GRASP_RIGHT_HAND]"] = dyn_overlay_right
 		else
-			dynamic_overlay["[cloth_layer]"] += dyn_overlay_worn
-			dynamic_overlay["[HAND_LAYER]-[GRASP_LEFT_HAND]"] += dyn_overlay_left
-			dynamic_overlay["[HAND_LAYER]-[GRASP_RIGHT_HAND]"] += dyn_overlay_right
+			if(dynamic_overlay["[cloth_layer]"])
+				var/image/dynamic = dynamic_overlay["[cloth_layer]"]
+				dynamic.overlays += dyn_overlay_worn
+				dynamic_overlay["[cloth_layer]"] = dynamic
+			else
+				dynamic_overlay["[cloth_layer]"] = dyn_overlay_worn
+
+			if(dynamic_overlay["[HAND_LAYER]-[GRASP_LEFT_HAND]"])
+				var/image/dynamic = dynamic_overlay["["[HAND_LAYER]-[GRASP_LEFT_HAND]"]"]
+				dynamic.overlays += dyn_overlay_left
+				dynamic_overlay["[HAND_LAYER]-[GRASP_LEFT_HAND]"] = dynamic
+			else
+				dynamic_overlay["[HAND_LAYER]-[GRASP_LEFT_HAND]"] = dyn_overlay_left
+
+			if(dynamic_overlay["[HAND_LAYER]-[GRASP_RIGHT_HAND]"])
+				var/image/dynamic = dynamic_overlay["["[HAND_LAYER]-[GRASP_RIGHT_HAND]"]"]
+				dynamic.overlays += dyn_overlay_right
+				dynamic_overlay["[HAND_LAYER]-[GRASP_RIGHT_HAND]"] = dynamic
+			else
+				dynamic_overlay["[HAND_LAYER]-[GRASP_RIGHT_HAND]"] = dyn_overlay_right
 
 
 /obj/item/clothing/can_quick_store(var/obj/item/I)
@@ -365,7 +382,11 @@
 				return
 			if (dye_target == "Full" || choices.len <= 1)
 				dyed_parts.len = 0
-				color = BlendRGB(color, mixed_color, mixed_alpha/255)
+				if(!dorfized)
+					color = BlendRGB(color, mixed_color, mixed_alpha/255)
+				else
+					for(var/part in dyeable_parts)
+						dyed_parts[part] = list(mixed_color,mixed_alpha)
 			else
 				dyed_parts -= dye_target//moving the new layer on top
 				dyed_parts[actual_parts[dye_target]] = list(mixed_color,mixed_alpha)//getting back the actual overlay name

@@ -319,11 +319,14 @@
 	desc = "Chains fashioned together into a hood."
 	icon_state = "chainmail_head"
 	item_state = "chainmail_head"
+	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/linencrafts.dmi', "right_hand" = 'icons/mob/in-hand/right/linencrafts.dmi')
 	species_fit = list(INSECT_SHAPED)
 	body_parts_covered = HEAD|EARS|HIDEHAIR
 	body_parts_visible_override = FACE
 	armor = list(melee = 10, bullet = 15, laser = 2,energy = 2, bomb = 2, bio = 2, rad = 0)
 	flags = FPRINT
+	clothing_flags = COLORS_OVERLAY
+	dyeable_parts = list("inner")
 	siemens_coefficient = 1
 
 /obj/item/clothing/head/helmet/snail_helm

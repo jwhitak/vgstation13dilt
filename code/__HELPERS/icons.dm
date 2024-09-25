@@ -262,17 +262,23 @@
  * brightnessmod - Base brightness to use for the initial greyscale. Default is 0.50, scales from -1 to 1.
  * contrastmod - Base contrast to use for the initial greyscale. Default is 1.90, scales from 0 to inf.
  */
-/atom/proc/dorf_color(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
-	overlays += dorf_colorize(src, setcolor, brightnessmod, contrastmod)
+/atom/proc/dorf_color(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90, var/seteffect)
+	overlays += dorf_colorize(src, setcolor, brightnessmod, contrastmod, seteffect)
 
 /**
  * Vibrantly recolors an atom and returns an overlay to use for the recolor.
  * Accepts any atom A
+ *
+ * A - atom to change color
+ * setcolor - RGB color to set atom to. default is a random color.
+ * brightnessmod - Base brightness to use for the initial greyscale. Default is 0.50, scales from -1 to 1.
+ * contrastmod - Base contrast to use for the initial greyscale. Default is 1.90, scales from 0 to inf.
+ * seteffect - set an effect (any available in icons/effects/effects.dmi) as a masked overlay INSTEAD of a color
  */
-/proc/dorf_colorize(var/atom/A, var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
+/proc/dorf_colorize(var/atom/A, var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90, var/seteffect)
 	if(!A)
 		return
-	if(!setcolor)
+	if(!setcolor && !seteffect)
 		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
 	//Base greyscale layer.
 	var/basegrayscale = generate_color_matrix_bcs(brightnessmod,contrastmod,0)
@@ -281,7 +287,16 @@
 	baseoverlay.filters += filter(type="color", color = basegrayscale)
 	//Color layer, this applies the desired color.
 	//Despite the above filter clearly layering over the atom, the color variable is applied after the filter (thanks DM!)
-	baseoverlay.color = setcolor
+	if(!seteffect)
+		baseoverlay.color = setcolor
+	else
+		var/image/funny = image('icons/effects/effects.dmi', A, seteffect)
+		funny.blend_mode = BLEND_INSET_OVERLAY
+		var/image/mask = image(A.icon, A, A.icon_state)
+		mask.appearance_flags = KEEP_TOGETHER
+		mask.blend_mode = BLEND_MULTIPLY
+		mask.overlays += funny
+		baseoverlay.overlays += mask
 	//Finally, add a 'glint' layer to brighten the image and maintain white/bright spots.
 	var/image/glint = image(A.icon, A, A.icon_state)
 	glint.appearance_flags = RESET_COLOR
@@ -292,7 +307,10 @@
 	//Recursively recolor other overlays on the atom before applying this new colorized overlay.
 	var/list/overlaystorage = list()
 	for(var/subject in A.overlays)
-		dorf_colorize(subject, setcolor)
+		if(seteffect)
+			dorf_colorize(subject, seteffect = seteffect)
+		else
+			dorf_colorize(subject, setcolor)
 		overlaystorage += subject
 		A.overlays -= subject
 
@@ -329,6 +347,13 @@
 /atom/proc/dorf_gold_test(var/brightnessmod = 0.50, var/contrastmod = 1.90)
 	dorf_color("#F7C430", brightnessmod, contrastmod)
 
+/atom/proc/dorf_effects(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90, var/seteffect)
+	var/effect = pick("rainbow", "static_base", "fire_trails", "ice", "wave4", "scanline")
+	setcolor = null
+	overlays += dorf_colorize(src, setcolor, brightnessmod, contrastmod, effect)
+
+/atom/proc/dorf_clown(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90, var/seteffect)
+	overlays += dorf_colorize(src, setcolor, brightnessmod, contrastmod, "rainbow")
 /*
  * Returns an atom's average RGB value, ignoring greyscale
  */

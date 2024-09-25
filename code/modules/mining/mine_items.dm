@@ -93,12 +93,6 @@
 		to_chat(user, "You mold the slime extract around the tip of \the [src].")
 		return TRUE
 
-/obj/item/weapon/pickaxe/hammer
-	name = "sledgehammer"
-	//icon_state = "sledgehammer" Waiting on sprite
-	desc = "A mining hammer made of reinforced metal. You feel like smashing your boss in the face with this."
-	drill_verb = "hammering"
-
 /obj/item/weapon/pickaxe/silver
 	name = "silver pickaxe"
 	icon_state = "spickaxe"

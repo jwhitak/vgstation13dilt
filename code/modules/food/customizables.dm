@@ -90,7 +90,6 @@
 	update_icon()
 
 /obj/item/trash/plate/update_icon()
-	overlays.len = 0
 	if(clean)
 		desc = "Clean enough to eat on, probably."
 		icon_state = "cleanplate"

@@ -587,11 +587,12 @@ a {
 /obj/update_icon()
 	if(dorfized)
 		dorfized.generate_sprite(src)
-		icon = 'icons/effects/32x32.dmi'
-		icon_state = "blank"
-	else
-		icon = initial(icon)
-		icon_state = initial(icon_state)
+		if(dorfized.override_base_icon)
+			icon = 'icons/effects/32x32.dmi'
+			icon_state = "blank"
+	//else
+		//icon = initial(icon)
+		//icon_state = initial(icon_state)
 	if(ash_covered)
 		cut_overlay(charred_overlay)
 		process_charred_overlay()
@@ -902,20 +903,32 @@ a {
 		if(force_dorfize)
 			dorfized = force_dorfize
 		else
-			dorfized = new(dorf_colorize(src, material_type.color))
+			if(material_type.color_effect && quality >= 5)
+				dorfized = new(dorf_colorize(src, seteffect = material_type.color_effect))
+			else
+				dorfized = new(dorf_colorize(src, material_type.color))
 	return src
 
 /obj/item/dorfify(var/datum/material/mat, var/additional_quality, var/min_quality = 0, var/force_dorfize = FALSE)
 	. = ..()
-	if(dorfized && !force_dorfize)
-		dorfized.dyn_overlay_left = dorf_colorize(image(inhand_states["left_hand"], src, item_state ? item_state : icon_state), material_type.color)
-		dorfized.dyn_overlay_right = dorf_colorize(image(inhand_states["right_hand"], src, item_state ? item_state : icon_state), material_type.color)
+	if(dorfized && ((!force_dorfize && !dorfized.override_inhands) || (force_dorfize && dorfized.override_inhands))) //forced and override? or not forced and no override?
+		if(material_type.color_effect && quality >= 5)
+			dorfized.dyn_overlay_left = dorf_colorize(image(inhand_states["left_hand"], src, item_state ? item_state : icon_state), seteffect = material_type.color_effect)
+			dorfized.dyn_overlay_right = dorf_colorize(image(inhand_states["right_hand"], src, item_state ? item_state : icon_state), seteffect = material_type.color_effect)
+		else
+			dorfized.dyn_overlay_left = dorf_colorize(image(inhand_states["left_hand"], src, item_state ? item_state : icon_state), material_type.color)
+			dorfized.dyn_overlay_right = dorf_colorize(image(inhand_states["right_hand"], src, item_state ? item_state : icon_state), material_type.color)
+	if(material_type)
+		toolspeed = clamp(initial(toolspeed) / (material_type.tool_mod * max(quality/B_AVERAGE,0.5)), 0.05, 0.6)
 
 /obj/item/clothing/dorfify(var/datum/material/mat, var/additional_quality, var/min_quality = 0, var/force_dorfize = FALSE)
 	. = ..()
 	if(dorfized && !force_dorfize && cloth_layer)
 		dorfized.cloth_layer = cloth_layer
-		dorfized.dyn_overlay_worn = dorf_colorize(image(cloth_icon, src, icon_state), material_type.color)
+		if(material_type.color_effect && quality >= 5)
+			dorfized.dyn_overlay_worn = dorf_colorize(image(cloth_icon, src, icon_state), seteffect = material_type.color_effect)
+		else
+			dorfized.dyn_overlay_worn = dorf_colorize(image(cloth_icon, src, icon_state), material_type.color)
 
 
 /obj/proc/check_uplink_validity()

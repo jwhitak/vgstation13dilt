@@ -168,11 +168,13 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 	var/value=0
 	var/color
 	var/alpha = 255
+	var/color_effect //an effect from effects.dmi which will override the color of smithed items of good quality or better
 	//Modifier multipliers.
 	var/brunt_damage_mod = 1
 	var/sharpness_mod = 1
 	var/quality_mod = 1
 	var/melt_temperature = MELTPOINT_STEEL
+	var/tool_mod = 1 //1 to 4, with higher being better
 	var/armor_mod = 1
 	var/default_show_in_menus = TRUE // If false, stuff like the smelter won't show these *unless it has some*.
 
@@ -237,6 +239,7 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 	brunt_damage_mod = 1.4
 	sharpness_mod = 1.6
 	quality_mod = 2
+	tool_mod = 4
 	melt_temperature = MELTPOINT_CARBON
 
 /datum/material/plasma
@@ -250,6 +253,7 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 	brunt_damage_mod = 1.2
 	sharpness_mod = 1.4
 	quality_mod = 1.3
+	tool_mod = 2
 	cc_per_sheet = CC_PER_SHEET_PLASMA
 
 /datum/material/plasma/on_use(obj/source, atom/target, mob/user)
@@ -257,6 +261,9 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 		return
 	if(isliving(target))
 		var/mob/living/L = target
+		var/mob/living/carbon/human/H = L
+		if(istype(H) && H.species.flags & PLASMA_IMMUNE)
+			return
 		L.adjustToxLoss(rand(1,source.quality))
 
 /datum/material/gold
@@ -270,6 +277,7 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 	brunt_damage_mod = 0.9
 	sharpness_mod = 0.5
 	quality_mod = 1.8
+	tool_mod = 3
 	melt_temperature = MELTPOINT_GOLD
 	cc_per_sheet = CC_PER_SHEET_GOLD
 
@@ -284,6 +292,7 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 	brunt_damage_mod = 0.2
 	sharpness_mod = 1.8
 	quality_mod = 1.5
+	tool_mod = 2
 	melt_temperature = MELTPOINT_SILVER
 	cc_per_sheet = CC_PER_SHEET_SILVER
 
@@ -298,6 +307,7 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 	brunt_damage_mod = 1.8
 	sharpness_mod = 0.2
 	quality_mod = 1.4
+	tool_mod = 2
 	melt_temperature = MELTPOINT_URANIUM
 	cc_per_sheet = CC_PER_SHEET_URANIUM
 
@@ -313,6 +323,8 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 	name="Bananium"
 	id=MAT_CLOWN
 	value=VALUE_CLOWN
+	color = "#fcf80d" //yellow, a temporary state of flux, until the material has been forged.
+	color_effect = "rainbow"
 	oretype=/obj/item/stack/ore/clown
 	sheettype=/obj/item/stack/sheet/mineral/clown
 	cointype=/obj/item/weapon/coin/clown
@@ -320,23 +332,18 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 	cc_per_sheet = CC_PER_SHEET_CLOWN
 
 /datum/material/clown/New()
-	if(!..())
-		return
-	brunt_damage_mod = rand(1,2)/rand(1,8)
-	sharpness_mod = rand(1,2)/rand(1,8)
-	quality_mod = rand(1,2)/rand(1,8)
+	brunt_damage_mod = rand(2,18)/10
+	sharpness_mod = rand(2,18)/10
+	quality_mod = rand(10,30)/10
+	tool_mod = rand(1,4)
 
-	color 			= list(rand(),rand(),rand(),0,
-						rand(),rand(),rand(),0,
-						rand(),rand(),rand(),0,
-						0,0,0,1,
-						0,0,0,0)
+	color = rgb(rand(0,255),rand(0,255),rand(0,255))
 
 /datum/material/clown/on_use(obj/source) //May [ticker.deity] have mercy
 	if(!..())
 		return
 	if(prob(10*source.quality))
-		playsound(source, 'sound/items/bikehorn.ogg', 100, 1)
+		playsound(source, 'sound/items/bikehorn.ogg', 50, 1)
 
 /datum/material/phazon
 	name="Phazon"
@@ -350,6 +357,7 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 	brunt_damage_mod = 1.4
 	sharpness_mod = 1.8
 	quality_mod = 2.2
+	tool_mod = 4
 	melt_temperature = MELTPOINT_PLASMA
 	cc_per_sheet = CC_PER_SHEET_PHAZON
 
@@ -602,7 +610,7 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 /datum/material/gingerbread
 	name="Gingerbread"
 	id=MAT_GINGERBREAD
-	value=null
+	value=0
 	oretype=null
 	sheettype=/obj/item/stack/sheet/mineral/gingerbread
 	cointype=null

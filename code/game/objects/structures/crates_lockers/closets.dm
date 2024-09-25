@@ -614,10 +614,11 @@
 	overlays.len = 0
 	if(!opened)
 		icon_state = icon_closed
-		if(welded)
-			overlays += image(icon = icon, icon_state = "welded")
 	else
 		icon_state = icon_opened
+	..()
+	if(welded)
+		overlays += image(icon = icon, icon_state = "welded")
 
 // Objects that try to exit a locker by stepping were doing so successfully,
 // and due to an oversight in turf/Enter() were going through walls.  That
