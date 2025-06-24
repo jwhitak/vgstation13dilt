@@ -470,8 +470,38 @@
 	icon_state = "hammer"
 	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/hammer_left.dmi', "right_hand" = 'icons/mob/in-hand/right/hammer_right.dmi')
 	force = 8
+	throwforce = 10
+	throw_speed = 5
 	hitsound = 'sound/weapons/toolbox.ogg'
 	w_type = RECYK_METAL
+
+/obj/item/weapon/hammer/sledge
+	name = "huge smithing hammer"
+	desc = "for those with a predeliction for applying concussive maintenance, but with two hands! Wielding it will allow stronger hits while smithing."
+	icon = 'icons/obj/weapons.dmi'
+	icon_state = "sledge"
+	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/swords_axes.dmi', "right_hand" = 'icons/mob/in-hand/right/swords_axes.dmi')
+	flags = TWOHANDABLE
+	force = 10
+	throwforce = 15
+	throw_speed = 5
+	attack_delay = 25 // Big swing
+	hitsound = 'sound/weapons/toolbox.ogg'
+	w_type = RECYK_METAL
+	w_class = W_CLASS_LARGE
+	var/base_force = 10
+
+/obj/item/weapon/hammer/sledge/update_wield(mob/user)
+	item_state = "sledge[wielded ? 1 : ""]"
+
+	force = base_force
+	if(wielded)
+		force += 6
+
+	if(user)
+		user.update_inv_hands()
+	update_icon()
+	return
 
 /obj/item/weapon/pitchfork
 	name = "pitchfork"
@@ -482,7 +512,7 @@
 	flags = TWOHANDABLE
 	force = 8
 	sharpness = 1.4
-	sharpness = SHARP_TIP
+	sharpness_flags = SHARP_TIP
 	hitsound = 'sound/weapons/bladeslice.ogg'
 	w_type = RECYK_METAL
 	var/base_force = 8
@@ -496,6 +526,7 @@
 
 	if(user)
 		user.update_inv_hands()
+	update_icon()
 	return
 
 /obj/item/weapon/melee/wooden_club

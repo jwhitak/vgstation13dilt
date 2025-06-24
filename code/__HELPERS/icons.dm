@@ -271,3 +271,168 @@
 	if(is_in_icon_folder && is_dmi_file)
 		return TRUE
 	return FALSE
+
+/*
+ * Generates a color matrix to modify an image's brightness, contrast, and/or saturation.
+ * Use by placing this in the image or icon's .color variable.
+ *
+ * brighntess - Brightness change from -1 to 1. default 0 for no change
+ * contrast - Contrast change from 0 to infinite. default 1 for no change
+ * saturation - Saturation change from 0 to infinite. default 1 for no change
+ */
+/proc/generate_color_matrix_bcs(var/brightness = 0, var/contrast = 1, var/saturation = 1)
+	//beware of math
+	//you were warned
+	//now embrace suffering as we venture into matrix multiplication
+	var/satred = (1 - saturation) * 0.3086 //magic luminance constants
+	var/satgreen = (1 - saturation) * 0.6094
+	var/satblue = (1 - saturation) * 0.0820
+
+	var/conshift = (1 - contrast) / 2
+	var/conchange = conshift + brightness
+
+	var/list/redrow = list(contrast * (satred + saturation), contrast * (satred), contrast * (satred), 0, 0)
+	var/list/greenrow = list(contrast * (satgreen), contrast * (satgreen + saturation), contrast * (satgreen), 0, 0)
+	var/list/bluerow = list(contrast * (satblue), contrast * (satblue), contrast * (satblue + saturation), 0, 0)
+	var/list/alpharow = list(0, 0, 0, 1, 0)
+	var/list/constantrow = list(conchange, conchange, conchange, 0, 1)
+
+	var/list/transformation_matrix = list(redrow, greenrow, bluerow, alpharow, constantrow)
+
+	return transformation_matrix
+
+/*
+ * Modifies an atom's brightness, contrast, and/or saturation.
+ * This adds a color filter over the atom by default, so .color use may be affected.
+ *
+ * brighntess - Brightness change from -1 to 1. default 0 for no change
+ * contrast - Contrast change from 0 to infinite. default 1 for no change
+ * saturation - Saturation change from 0 to infinite. default 1 for no change
+ * filter - Adds the greyscale layer as a color filter. default TRUE
+ */
+/atom/proc/change_bcs(var/b = 0, var/c = 1, var/s = 1, var/filter = TRUE)
+	if(filter)
+		filters += filter(type="color", color = generate_color_matrix_bcs(b, c, s))
+	else
+		color = generate_color_matrix_bcs(b, c, s)
+
+/*
+ * Vibrantly recolors an atom, though with some drawbacks.
+ * Doesn't function well on human mobs at present.
+ *
+ * setcolor - RGB color to set the atom to. default is a random color.
+ * brightnessmod - Base brightness to use for the initial greyscale. Default is 0.50, scales from -1 to 1.
+ * contrastmod - Base contrast to use for the initial greyscale. Default is 1.90, scales from 0 to inf.
+ */
+/atom/proc/dorf_color(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90, var/seteffect)
+	overlays += dorf_colorize(src, setcolor, brightnessmod, contrastmod, seteffect)
+
+/**
+ * Vibrantly recolors an atom and returns an overlay to use for the recolor.
+ * Accepts any atom A
+ *
+ * A - atom to change color
+ * setcolor - RGB color to set atom to. default is a random color.
+ * brightnessmod - Base brightness to use for the initial greyscale. Default is 0.50, scales from -1 to 1.
+ * contrastmod - Base contrast to use for the initial greyscale. Default is 1.90, scales from 0 to inf.
+ * seteffect - set an effect (any available in icons/effects/effects.dmi) as a masked overlay INSTEAD of a color
+ */
+/proc/dorf_colorize(var/atom/A, var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90, var/seteffect)
+	if(!A)
+		return
+	if(!setcolor && !seteffect)
+		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
+	//Base greyscale layer.
+	var/basegrayscale = generate_color_matrix_bcs(brightnessmod,contrastmod,0)
+	var/image/baseoverlay = image(A.icon, A, A.icon_state)
+	baseoverlay.appearance_flags = RESET_COLOR
+	baseoverlay.filters += filter(type="color", color = basegrayscale)
+	//Color layer, this applies the desired color.
+	//Despite the above filter clearly layering over the atom, the color variable is applied after the filter (thanks DM!)
+	if(!seteffect)
+		baseoverlay.color = setcolor
+	else
+		var/image/funny = image('icons/effects/effects.dmi', A, seteffect)
+		funny.blend_mode = BLEND_INSET_OVERLAY
+		var/image/mask = image(A.icon, A, A.icon_state)
+		mask.appearance_flags = KEEP_TOGETHER
+		mask.blend_mode = BLEND_MULTIPLY
+		mask.overlays += funny
+		baseoverlay.overlays += mask
+	//Finally, add a 'glint' layer to brighten the image and maintain white/bright spots.
+	var/image/glint = image(A.icon, A, A.icon_state)
+	glint.appearance_flags = RESET_COLOR
+	var/glintgrayscale = generate_color_matrix_bcs(-0.50,1.95,0)
+	glint.color = glintgrayscale
+	glint.blend_mode = BLEND_ADD
+	baseoverlay.overlays += glint
+	//Recursively recolor other overlays on the atom before applying this new colorized overlay.
+	var/list/overlaystorage = list()
+	for(var/subject in A.overlays)
+		if(seteffect)
+			dorf_colorize(subject, seteffect = seteffect)
+		else
+			dorf_colorize(subject, setcolor)
+		overlaystorage += subject
+		A.overlays -= subject
+
+	//this is handled outside
+	//A.overlays += baseoverlay
+
+	//crazy recursive thing, todo readd later
+	//for(var/i = overlaystorage.len, i > 0, i--)
+	//	A.overlays += overlaystorage[i]
+
+	return baseoverlay
+
+/*
+/obj/item/dorf_color(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
+	if(!setcolor)
+		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
+	..(setcolor = setcolor)
+	var/image/lefthandoverlay = image(inhand_states["left_hand"], src, item_state ? item_state : icon_state)
+	var/image/righthandoverlay = image(inhand_states["right_hand"], src, item_state ? item_state : icon_state)
+	dynamic_overlay["[HAND_LAYER]-[GRASP_LEFT_HAND]"] = dorf_colorize(lefthandoverlay, setcolor, brightnessmod, contrastmod)
+	dynamic_overlay["[HAND_LAYER]-[GRASP_RIGHT_HAND]"] = dorf_colorize(righthandoverlay, setcolor, brightnessmod, contrastmod)
+
+/obj/item/clothing/dorf_color(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90)
+	if(!setcolor)
+		setcolor = rgb(rand(0,255),rand(0,255),rand(0,255))
+	..(setcolor = setcolor)
+	//todo: ARMOR COLORS!!
+*/
+
+/*
+ * A simple proc that uses dorf_color to turn things gold.
+ * This is literally just calling dorf_color but with the gold mineral color auto-selected.
+ */
+/atom/proc/dorf_gold_test(var/brightnessmod = 0.50, var/contrastmod = 1.90)
+	dorf_color("#F7C430", brightnessmod, contrastmod)
+
+/atom/proc/dorf_effects(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90, var/seteffect)
+	var/effect = pick("rainbow", "static_base", "fire_trails", "ice", "wave4", "scanline")
+	setcolor = null
+	overlays += dorf_colorize(src, setcolor, brightnessmod, contrastmod, effect)
+
+/atom/proc/dorf_clown(var/setcolor, var/brightnessmod = 0.50, var/contrastmod = 1.90, var/seteffect)
+	overlays += dorf_colorize(src, setcolor, brightnessmod, contrastmod, "rainbow")
+/*
+ * Returns an atom's average RGB value, ignoring greyscale
+ */
+/atom/proc/find_average_color_block()
+	return AverageColor(icon(icon, icon_state), 1)
+
+/*
+ * Returns an atom's mode RGB, ignoring greyscale
+ */
+/atom/proc/find_color_mode()
+	var/list/colors = ListColors(icon(icon, icon_state), 1)
+	if(!colors.len)
+		return null
+	var/list/results = list()
+	for(var/x in colors)
+		if(!results[x])
+			results[x] = 1
+		else
+			results[x] += 1
+	return associative_max_key(results)

@@ -261,7 +261,7 @@
 	name = "shortsword"
 	desc = "A short-bladed sword, used for close combat agility, over overpowering your foes."
 	icon = 'icons/obj/blacksmithing/shortsword.dmi'
-	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/shortsword_left.dmi', "right_hand" = 'icons/mob/in-hand/right/shortsword_right.dmi')
+	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/smithing_left.dmi', "right_hand" = 'icons/mob/in-hand/right/smithing_right.dmi')
 	icon_state = "shortsword"
 	item_state = "shortsword"
 
@@ -269,7 +269,7 @@
 	name = "gladius"
 	desc = "An ancient sword design employed by the romans, used for its simple design for mass manufacture. It lacks a cross-guard."
 	icon = 'icons/obj/blacksmithing/gladius.dmi'
-	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/gladius_left.dmi', "right_hand" = 'icons/mob/in-hand/right/gladius_right.dmi')
+	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/smithing_left.dmi', "right_hand" = 'icons/mob/in-hand/right/smithing_right.dmi')
 	icon_state = "gladius"
 	item_state = "gladius"
 
@@ -277,7 +277,7 @@
 	name = "sabre"
 	desc = "A sword with a slight-curved blade, associated with cavalry usage. Commonly used for duelling in academic fencing."
 	icon = 'icons/obj/blacksmithing/sabre.dmi'
-	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/sabre_left.dmi', "right_hand" = 'icons/mob/in-hand/right/sabre_right.dmi')
+	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/smithing_left.dmi', "right_hand" = 'icons/mob/in-hand/right/smithing_right.dmi')
 	icon_state = "sabre"
 	item_state = "sabre"
 
@@ -285,6 +285,6 @@
 	name = "scimitar"
 	desc = "A sword with a curved blade. The curved blade made it easier for use from horseback."
 	icon = 'icons/obj/blacksmithing/scimitar.dmi'
-	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/scimitar_left.dmi', "right_hand" = 'icons/mob/in-hand/right/scimitar_right.dmi')
+	inhand_states = list("left_hand" = 'icons/mob/in-hand/left/smithing_left.dmi', "right_hand" = 'icons/mob/in-hand/right/smithing_right.dmi')
 	icon_state = "scimitar"
 	item_state = "scimitar"

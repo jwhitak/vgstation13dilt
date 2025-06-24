@@ -81,7 +81,6 @@
 	armor = list(melee = 25, bullet = 90, laser = 90, energy = 10, bomb = 25, bio = 0, rad = 0)
 	armor_absorb = list(melee = 25, bullet = 5, laser = 60, energy = -5, bomb = 0, bio = 0, rad = 0)
 
-
 /obj/item/weapon/armor_plate/proc/receive_damage(var/type, var/amount)
 	if(type == BRUTE || type == BURN)
 		health -= amount
@@ -121,3 +120,9 @@
 	health = 20
 	armor = list(melee = 10, bullet = 10, laser = 90, energy = 50, bomb = 0, bio = 0, rad = 0)
 	armor_absorb = list(melee = 25, bullet = 20, laser = 20, energy = -5, bomb = 0, bio = 0, rad = 0)
+
+/obj/item/weapon/armor_plate/smithed
+	icon = 'icons/obj/items.dmi'
+	icon_state = "plate_1"
+	name = "armor plate"
+	desc = "A generic armor plate for use in plate carriers."

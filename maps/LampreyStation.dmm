@@ -14106,7 +14106,7 @@
 /area/lamprey/bronxmaintenanceblob)
 "aGp" = (
 /obj/effect/decal/cleanable/ash,
-/obj/item/cross_guard,
+/obj/item/guard/cross_guard,
 /turf/simulated/floor/plating,
 /area/lamprey/bronxmaintenanceblob)
 "aGq" = (
@@ -58078,7 +58078,7 @@
 "cAr" = (
 /obj/structure/grille/broken,
 /obj/effect/decal/cleanable/dirt,
-/obj/item/cross_guard,
+/obj/item/guard/cross_guard,
 /turf/simulated/floor/plating,
 /area/lamprey/medbaywarehousemaintenanceblob)
 "cAs" = (
@@ -64235,7 +64235,7 @@
 	icon_state = "warning";
 	tag = "icon-warning (WEST)"
 	},
-/obj/item/cross_guard,
+/obj/item/guard/cross_guard,
 /turf/simulated/floor/plating,
 /area/lamprey/researchwarehousemaintenanceblob)
 "cNQ" = (
@@ -188418,7 +188418,7 @@
 /obj/item/trash/beezeez,
 /obj/item/osipr_core,
 /obj/item/pizzabox/meat,
-/obj/item/sword_handle,
+/obj/item/handle,
 /obj/item/alien_embryo,
 /turf/simulated/floor/vox{
 	icon_state = "whitepurplefull"
