@@ -462,6 +462,7 @@ var/global/list/initial_materials	//Stores all the matids = 0 in helping New
 	brunt_damage_mod = 1.4
 	sharpness_mod = 0.6
 	quality_mod = 3 //stupidly rare material (not to mention blacksmithing itself almost never happens)
+	tool_mod = 4
 	armor_mod = 1.75 //if only armorsmithing were a thing
 	cc_per_sheet = CC_PER_SHEET_MYTHRIL
 
