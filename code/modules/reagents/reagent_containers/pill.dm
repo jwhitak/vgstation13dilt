@@ -544,3 +544,17 @@
 /obj/item/weapon/reagent_containers/pill/nanofloxacin/New()
 	..()
 	reagents.add_reagent(NANOFLOXACIN, 1)
+
+/obj/item/weapon/reagent_containers/pill/teststuff
+	name = "test pill"
+	desc = "holy based colors batman."
+	icon_state = "pillroundhalf"
+
+/obj/item/weapon/reagent_containers/pill/teststuff/New()
+	..()
+	//var/list/random_color_list = list("#00aedb","#a200ff","#f47835","#d41243","#d11141","#00b159","#00aedb","#f37735","#ffc425","#008744","#0057e7","#d62d20","#ffa700")
+	color = rgb(rand(0,255),rand(0,255),rand(0,255))
+	var/image/half = image('icons/obj/chemical.dmi',src,"pillroundhalf2")
+	half.color = rgb(rand(0,255),rand(0,255),rand(0,255))
+	half.appearance_flags = RESET_COLOR
+	overlays += half
