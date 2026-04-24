@@ -65,7 +65,8 @@
 	if(J.amount < J.initial_amount)
 		teeth_missing = 1
 	else
-		to_chat(user, "<span class='warning'>\The [target] already has a full mouth of teeth.</span>")
+		if(tool)
+			to_chat(user, "<span class='warning'>\The [target] already has a full mouth of teeth.</span>")
 		return 0
 
 	return ..() && target.op_stage.tooth_replace == 1 && teeth_missing

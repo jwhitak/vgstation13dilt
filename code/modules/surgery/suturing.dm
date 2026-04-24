@@ -21,6 +21,8 @@
 	if(!affected.is_organic()) //can't suture robolimbs OR PEG LIMBS
 		to_chat(user, "<span class='warning'>That limb isn't biological!")
 		return FALSE
+	if(!tool)
+		return FALSE
 
 	if(tool.heal_brute)
 		if(affected.brute_dam > affected.SUTURABLE_DAMAGE)

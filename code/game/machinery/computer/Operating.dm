@@ -68,7 +68,19 @@
 <B>Suffocation Damage:</B> [src.victim.getOxyLoss()]<BR>
 <B>Patient Status:</B> [src.victim.stat ? "Non-Responsive" : "Stable"]<BR>
 <BR>
-<A HREF='?src=\ref[user];mach_close=op'>Close</A>"}
+<B>Surgeries available:</B>"}
+		var/incision_detected
+		for(var/target_area in victim.organs_by_name)
+			if(victim.organs_by_name[target_area] && !victim.organs_by_name[target_area].open)
+				//No initial incision
+				continue
+			incision_detected = target_area
+			for(var/datum/surgery_step/S in surgery_steps)
+				if(S.can_use(user, victim, target_area, null)) //No tool being used
+					dat += "<BR>[S] - targetting the [target_area]"
+		if(!incision_detected)
+			dat += "<BR><B>Make Incision to Begin</B>"
+		dat += "<BR><A HREF='?src=\ref[user];mach_close=op'>Close</A>"
 	else
 		src.victim = null
 		dat += {"
